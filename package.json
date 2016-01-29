@@ -1,6 +1,6 @@
 {
   "name": "homebridge-winpc",
-  "version": "0.3.20",
+  "version": "0.3.21",
   "description": "Homebridge module for the windows PC (using WOL and Airytec Switch Off)",
   "main": "index.js",
   "scripts": {
