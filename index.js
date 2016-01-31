@@ -78,11 +78,6 @@ function HttpStatusAccessory(log, config)
 			var binaryState = parseInt(data);
 			that.state = binaryState > 0;
 			that.log("State data changed message received: ", binaryState); 
-
-			if (that.switchService ) {
-				that.switchService .getCharacteristic(Characteristic.On)
-				.setValue(that.state);
-			}
 		});
 	}
 }
