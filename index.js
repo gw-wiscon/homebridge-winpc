@@ -102,6 +102,7 @@ httpRequest: function(url, body, method, username, password, sendimmediately, ca
 			body: body,
 			method: method,
 			rejectUnauthorized: false,
+			timeout: 3000,
 			auth: {
 				user: username,
 				pass: password,
