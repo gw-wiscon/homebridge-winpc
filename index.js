@@ -78,11 +78,10 @@ function HttpStatusAccessory(log, config)
 			var binaryState = parseInt(data);
 			that.state = binaryState > 0;
 			that.log("State data changed message received: ", binaryState); 
-			/*Causes a switch off - we only want to inform homekit, 
-			but this is doing more
+
 			if (that.switchService ) {
-				that.switchService.getCharacteristic(Characteristic.On).setValue(that.state);
-			}*/
+				that.switchService.getCharacteristic(Characteristic.On).setValue(that.state, null, "statuspoll");
+			}
 		});
 	}
 }
@@ -120,11 +119,16 @@ httpRequest: function(url, body, method, username, password, sendimmediately, ca
 	}
 },
 
-setPowerState: function(powerOn, callback) {
+setPowerState: function(powerOn, callback, context) {
     var url;
     var body;
 	var that = this;
 
+	if (context && context == "statuspoll") {
+		this.log( "setPowerState -- Status poll context is set, ignore request.");
+		callback(null, powerOn);
+	    return;
+	}
     if (!this.on_url || !this.off_url) {
     	    this.log.warn("Ignoring request; No power url defined.");
 	    callback(new Error("No power url defined."));
