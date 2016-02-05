@@ -86,14 +86,35 @@ function HttpStatusAccessory(log, config)
 	}
 }
 
+function parse( url) {
+	var address = {};
+	var s = url.replace(/^WOL[:]?[\/]?[\/]?(.*)[\?]ip=(.*)|^WOL[:]?[\/]?[\/]?(.*)/ig, function( str, p1, p2, p3) {
+		if (p1) {
+			address.mac = p1;
+			address.ip = p2;
+		}
+		if (p3) {
+			address.mac  = p3;
+		}
+	});
+	return address;
+}
+
 HttpStatusAccessory.prototype = {
 
 httpRequest: function(url, body, method, username, password, sendimmediately, callback) {
 	if (url.substring( 0, 3).toUpperCase() == "WOL") {
 		//Wake on lan request
-		var macAddress = url.replace(/^WOL[:]?[\/]?[\/]?/ig,"");
-		this.log("Excuting WakeOnLan request to "+macAddress);
-		wol.wake(macAddress, function(error) {
+		var address = parse( url);
+		
+		var opts={};
+		var macAddress = address.mac;
+		if (address.ip) {
+			opts.address = address.ip;
+		}
+		
+		this.log("Excuting WakeOnLan request to "+macAddress+" options: "+JSON.stringify( opts));
+		wol.wake(macAddress, opts, function(error) {
 		  if (error) {
 			callback( error);
 		  } else {

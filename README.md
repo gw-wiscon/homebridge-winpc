@@ -38,3 +38,22 @@ Example accessory config (needs to be added to the homebridge config.json):
 	}
 ]
  ```
+Or:
+ ```
+"accessories": [
+	{
+		"accessory": "WinPC",
+		"name": "My Windows PC",
+		"http_method": "GET",
+		"on_url": "wol://40:39:51:04:99:c0?ip=10.0.1.23",
+		"off_url": "http://10.0.1.23:7878/?action=System.Shutdown",
+		"status_url": "http://10.0.1.23:7878/",
+		"sendimmediately": "yes",
+		"poll_status_interval": "60",
+		"username" : "User",
+		"password" : "password",
+		"powerstateOnError" : "0",
+		"powerstateOnConnect" : "1"				
+	}
+]
+ ```
