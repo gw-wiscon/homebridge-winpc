@@ -154,11 +154,14 @@ setPowerState: function(powerOn, callback, context) {
 			var powerOn = false;
 			that.log("Power state is currently %s", powerOn);
 			that.state = powerOn;
-			
+			if (that.switchService ) {
+				that.switchService.getCharacteristic(Characteristic.On).setValue(powerOn, null, "statuspoll");
+			}	
 			callback(null, powerOn);
 		} else {
+			that.state = powerOn;
 			that.log('HTTP set power function succeeded!');
-			callback();
+			callback(null, powerOn);
 		}
     }.bind(this));
 },
