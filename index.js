@@ -180,7 +180,7 @@ getPowerState: function(callback, context) {
     }
     
     var url = this.status_url;
-    this.log("Getting power state");
+    //this.log("Getting power state");
 	var that = this;
 
     this.httpRequest(url, "", "GET", this.username, this.password, this.sendimmediately, function(error, response, responseBody) {
@@ -200,13 +200,13 @@ getPowerState: function(callback, context) {
 		if (tError) {
 			that.log('HTTP get power function failed: %s', error.message);
 			var powerOn = false;
-			that.log("Power state is currently %s", powerOn);
+			that.log("Get - Power state is currently %s", powerOn);
 			that.state = powerOn;
 			callback(null, powerOn);
 		} else {
 			var binaryState = parseInt(tResp);
 			var powerOn = binaryState > 0;
-			that.log("Get - Power state is currently %s", powerOn);
+			//that.log("Get - Power state is currently %s", powerOn);
 			that.state = powerOn;
 			callback(null, powerOn);
 		}
