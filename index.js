@@ -51,33 +51,14 @@ function HttpStatusAccessory(log, config)
 		
 		var statusemitter = pollingtoevent(function(done) {
 			//that.log("Polling switch level..");
-			that.httpRequest(powerurl, "", "GET", that.username, that.password, that.sendimmediately, function(error, response, body) {
-				var tResp = body;
-				var tError = error;
-				if (tError) {
-					if (that.powerstateOnError) {
-					  tResp = that.powerstateOnError;
-					  tError = null;
-					}
-				} else {
-					if (that.powerstateOnConnect) {
-					  tResp = that.powerstateOnConnect;
-					  tError = null;
-					}
-				}
-				if (tError) {
-					that.log('HTTP get power function failed: %s', error.message);
-					done(error);
-				} else {			
-					done(null, tResp);
-				}
-			})
+			that.getPowerState( function( error, response) {
+				done(error, response);
+			}, "statuspoll");
 		}, {longpolling:true,interval:that.interval * 1000,longpollEventName:"statuspoll"});
 
 		statusemitter.on("statuspoll", function(data) {
-			var binaryState = parseInt(data);
-			that.state = binaryState > 0;
-			that.log("State data changed message received: ", binaryState); 
+			that.state = data;
+			that.log("Event - State data changed message received: ", that.state); 
 
 			if (that.switchService ) {
 				that.switchService.getCharacteristic(Characteristic.On).setValue(that.state, null, "statuspoll");
@@ -145,6 +126,7 @@ setPowerState: function(powerOn, callback, context) {
     var body;
 	var that = this;
 
+//if context is statuspoll, then we need to ensure that we do not set the actual value
 	if (context && context == "statuspoll") {
 		this.log( "setPowerState -- Status poll context is set, ignore request.");
 		callback(null, powerOn);
@@ -181,11 +163,14 @@ setPowerState: function(powerOn, callback, context) {
     }.bind(this));
 },
   
-getPowerState: function(callback) {
-	if (this.switchHandling == "poll") {
-		this.log("getPowerState - polling mode, return state: ", this.state);
-		callback(null, this.state);
-		return;
+getPowerState: function(callback, context) {
+//if context is statuspoll, then we need to request the actual value
+	if (!context || context != "statuspoll") {
+		if (this.switchHandling == "poll") {
+			this.log("getPowerState - polling mode, return state: ", this.state);
+			callback(null, this.state);
+			return;
+		}
 	}
 	
     if (!this.status_url) {
@@ -221,7 +206,7 @@ getPowerState: function(callback) {
 		} else {
 			var binaryState = parseInt(tResp);
 			var powerOn = binaryState > 0;
-			that.log("Power state is currently %s", binaryState);
+			that.log("Get - Power state is currently %s", powerOn);
 			that.state = powerOn;
 			callback(null, powerOn);
 		}
