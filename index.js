@@ -50,7 +50,7 @@ function HttpStatusAccessory(log, config)
 		var powerurl = this.status_url;
 		
 		var statusemitter = pollingtoevent(function(done) {
-			//that.log("Polling switch level..");
+			that.log("Polling switch level..");
 			that.getPowerState( function( error, response) {
 				done(error, response);
 			}, "statuspoll");
@@ -183,7 +183,7 @@ getPowerState: function(callback, context) {
     }
     
     var url = this.status_url;
-    //this.log("Getting power state");
+    this.log("Getting power state");
 	var that = this;
 
     this.httpRequest(url, "", "GET", this.username, this.password, this.sendimmediately, function(error, response, responseBody) {
@@ -209,7 +209,7 @@ getPowerState: function(callback, context) {
 		} else {
 			var binaryState = parseInt(tResp);
 			var powerOn = binaryState > 0;
-			//that.log("Get - Power state is currently %s", powerOn);
+			that.log("Get - Power state is currently %s", powerOn);
 			that.state = powerOn;
 			callback(null, powerOn);
 		}
