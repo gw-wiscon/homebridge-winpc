@@ -1,6 +1,6 @@
 {
   "name": "homebridge-winpc",
-  "version": "0.3.41",
+  "version": "0.3.43",
   "description": "Homebridge module for the windows PC (using WOL and Airytec Switch Off)",
   "main": "index.js",
   "scripts": {
@@ -31,7 +31,7 @@
   "author": "gw-wiscon <gw.wiscon@gmail.com> (http://)",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/gwk-wiscon/homebridge-winpc/issues"
+    "url": "https://github.com/gw-wiscon/homebridge-winpc/issues"
   },
-  "homepage": "https://github.com/gwk-wiscon/homebridge-winpc#readme"
+  "homepage": "https://github.com/gw-wiscon/homebridge-winpc#readme"
 }
