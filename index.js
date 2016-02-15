@@ -15,6 +15,7 @@ function HttpStatusAccessory(log, config)
 {
 	this.log = log;
 	var that = this;
+	this.setAttempt = 0;
 
 	// url info
 	this.on_url = config["on_url"];
@@ -50,15 +51,16 @@ function HttpStatusAccessory(log, config)
 		var powerurl = this.status_url;
 		
 		var statusemitter = pollingtoevent(function(done) {
-			that.log("Polling switch level..");
+			that.log("start polling..");
 			that.getPowerState( function( error, response) {
-				done(error, response);
+				//pass also the setAttempt, to force a homekit update if needed
+				done(error, response, that.setAttempt);
 			}, "statuspoll");
 		}, {longpolling:true,interval:that.interval * 1000,longpollEventName:"statuspoll"});
 
 		statusemitter.on("statuspoll", function(data) {
 			that.state = data;
-			that.log("Event - State data changed message received: ", that.state); 
+			that.log("event - status poller - new state: ", that.state);
 
 			if (that.switchService ) {
 				that.switchService.getCharacteristic(Characteristic.On).setValue(that.state, null, "statuspoll");
@@ -121,15 +123,15 @@ httpRequest: function(url, body, method, username, password, sendimmediately, ca
 	}
 },
 
-setPowerState: function(powerOn, callback, context) {
+setPowerState: function(powerState, callback, context) {
     var url;
     var body;
 	var that = this;
 
 //if context is statuspoll, then we need to ensure that we do not set the actual value
 	if (context && context == "statuspoll") {
-		this.log( "setPowerState -- Status poll context is set, ignore request.");
-		callback(null, powerOn);
+		this.log( "setPowerState - polling mode, ignore, state: %s", this.state);
+		callback(null, powerState);
 	    return;
 	}
     if (!this.on_url || !this.off_url) {
@@ -138,30 +140,32 @@ setPowerState: function(powerOn, callback, context) {
 	    return;
     }
 
-    if (powerOn) {
+	this.setAttempt = this.setAttempt+1;
+		
+    if (powerState) {
 		url = this.on_url;
 		body = this.on_body;
-		this.log("Setting power state to on");
+		this.log("setPowerState - setting power state to on");
     } else {
 		url = this.off_url;
 		body = this.off_body;
-		this.log("Setting power state to off");
+		this.log("setPowerState - setting power state to off");
     }
 
     this.httpRequest(url, body, this.http_method, this.username, this.password, this.sendimmediately, function(error, response, responseBody) {
 		if (error) {
-			that.log('HTTP set power function failed: %s', error.message);
-			var powerOn = false;
-			that.log("Power state is currently %s", powerOn);
-			that.state = powerOn;
+			that.log('setPowerState - actual mode - failed: %s', error.message);
+			powerState = false;
+			that.state = powerState;
+			that.log("setPowerState - actual mode - current state: %s", that.state);
 			if (that.switchService ) {
-				that.switchService.getCharacteristic(Characteristic.On).setValue(powerOn, null, "statuspoll");
+				that.switchService.getCharacteristic(Characteristic.On).setValue(powerState, null, "statuspoll");
 			}	
-			callback(null, powerOn);
+			callback(null, powerState);
 		} else {
-			that.state = powerOn;
-			that.log('HTTP set power function succeeded!');
-			callback(null, powerOn);
+			that.state = powerState;
+			that.log("setPowerState - actual mode - current state: %s", that.state);
+			callback(null, powerState);
 		}
     }.bind(this));
 },
@@ -183,7 +187,7 @@ getPowerState: function(callback, context) {
     }
     
     var url = this.status_url;
-    this.log("Getting power state");
+    this.log("getPowerState - actual mode");
 	var that = this;
 
     this.httpRequest(url, "", "GET", this.username, this.password, this.sendimmediately, function(error, response, responseBody) {
@@ -201,17 +205,17 @@ getPowerState: function(callback, context) {
 			}
 		}
 		if (tError) {
-			that.log('HTTP get power function failed: %s', error.message);
-			var powerOn = false;
-			that.log("Get - Power state is currently %s", powerOn);
-			that.state = powerOn;
-			callback(null, powerOn);
+			that.log('getPowerState - actual mode - failed: %s', error.message);
+			var powerState = false;
+			that.log("getPowerState - actual mode - current state: %s", powerState);
+			that.state = powerState;
+			callback(null, powerState);
 		} else {
 			var binaryState = parseInt(tResp);
-			var powerOn = binaryState > 0;
-			that.log("Get - Power state is currently %s", powerOn);
-			that.state = powerOn;
-			callback(null, powerOn);
+			var powerState = binaryState > 0;
+			that.log("getPowerState - actual mode - current state: %s", powerState);
+			that.state = powerState;
+			callback(null, powerState);
 		}
     }.bind(this));
 },
