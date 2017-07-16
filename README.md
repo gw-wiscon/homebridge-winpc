@@ -14,7 +14,7 @@ Main difference is:
 # Installation
 
 1. Install homebridge using: npm install -g homebridge
-2. Install this plugin using: npm install -g homebridge-philipswinpc
+2. Install this plugin using: npm install -g homebridge-winpc
 3. Update your configuration file. See the sample below.
 
 # Configuration
